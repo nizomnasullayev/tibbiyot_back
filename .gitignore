@@ -1,0 +1,68 @@
+# -------------------------
+# Python
+# -------------------------
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Virtual Environment
+venv/
+.env/
+ENV/
+env/
+
+# Environment Variables
+.env
+.env.*
+*.env
+
+# -------------------------
+# Database
+# -------------------------
+*.sqlite3
+*.db
+
+# -------------------------
+# Logs
+# -------------------------
+*.log
+
+# -------------------------
+# IDE / Editor
+# -------------------------
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# -------------------------
+# OS
+# -------------------------
+.DS_Store
+Thumbs.db
+
+# -------------------------
+# Testing / Coverage
+# -------------------------
+.pytest_cache/
+.coverage
+htmlcov/
+
+# -------------------------
+# Migrations (optional)
+# -------------------------
+# If using Alembic and want to ignore versions:
+# alembic/versions/*.py
+
+# -------------------------
+# Build
+# -------------------------
+build/
+dist/
+*.egg-info/
+
+# -------------------------
+# Node (if you have frontend inside same repo)
+# -------------------------
+node_modules/

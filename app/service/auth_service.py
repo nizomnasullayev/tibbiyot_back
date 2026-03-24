@@ -1,32 +1,47 @@
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
 from uuid import UUID
+from collections.abc import Sequence
 
 from app.core.security import hash_password, verify_password
 from app.models.user import User
-from app.schema.user_schema import UserCreate, UserUpdate
+from app.schema.user_schema import UserCreate, UserUpdate, UserRole
+
+
+ALLOWED_ROLES = {UserRole.teacher.value, UserRole.admin.value}
+
+
+def _normalize_roles(roles: Sequence[str]) -> list[str]:
+    normalized_roles = sorted(set(roles))
+    invalid_roles = [role for role in normalized_roles if role not in ALLOWED_ROLES]
+    if invalid_roles:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Invalid roles: {', '.join(invalid_roles)}. Allowed roles: teacher, admin",
+        )
+    return normalized_roles
 
 
 def check_email(db: Session, email: str) -> bool:
     return db.query(User).filter(User.email == email).first() is not None
 
 
-def check_name(db: Session, name: str) -> bool:
-    return db.query(User).filter(User.name == name).first() is not None
+def check_name(db: Session, username: str) -> bool:
+    return db.query(User).filter(User.username == username).first() is not None
 
 
 def create_user(db: Session, user: UserCreate):
     if check_email(db, user.email):
         raise HTTPException(status_code=400, detail="Email already registered")
 
-    if check_name(db, user.name):
+    if check_name(db, user.username):
         raise HTTPException(status_code=400, detail="Name already taken")
 
     new_user = User(
         email=user.email,
-        name=user.name,
+        username=user.username,
         hashed_password=hash_password(user.password),
-        roles=["user"],
+        roles=[UserRole.teacher.value],
     )
     db.add(new_user)
     db.commit()
@@ -73,9 +88,12 @@ def update_user(db: Session, user_id: UUID, user_data: UserUpdate):
             raise HTTPException(status_code=400, detail="Email already registered")
 
     # name unique check
-    if "name" in update_data and update_data["name"] != db_user.name:
-        if check_name(db, update_data["name"]):
+    if "username" in update_data and update_data["username"] != db_user.username:
+        if check_name(db, update_data["username"]):
             raise HTTPException(status_code=400, detail="Name already taken")
+
+    if "roles" in update_data:
+        update_data["roles"] = _normalize_roles(update_data["roles"])
 
     for key, value in update_data.items():
         if key == "password":
@@ -93,7 +111,7 @@ def update_user_roles(db: Session, user_id: UUID, roles: list[str]):
     if not db_user:
         raise HTTPException(status_code=404, detail="User not found")
 
-    db_user.roles = roles
+    db_user.roles = _normalize_roles(roles)
     db.commit()
     db.refresh(db_user)
     return db_user
