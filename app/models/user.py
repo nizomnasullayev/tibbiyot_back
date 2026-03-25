@@ -1,22 +1,17 @@
-import uuid
-from sqlalchemy import Boolean
-from sqlalchemy import Column, String, DateTime
+from sqlalchemy import Column, String, Boolean, DateTime
+from sqlalchemy.dialects.postgresql import ARRAY
 from sqlalchemy.sql import func
-from sqlalchemy.dialects.postgresql import ARRAY, UUID
-from app.core.database import Base
-
+from app.database import Base
 
 class User(Base):
     __tablename__ = "users"
 
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
-
-    username = Column(String(50), unique=True, nullable=False, index=True)
-    email = Column(String(100), unique=True, nullable=False, index=True)
-    hashed_password = Column(String(255), nullable=False)
-
-    roles = Column(ARRAY(String), default=["teacher"], nullable=False)
-    is_active = Column(Boolean,default=False, nullable=False, index=True)
-    avatar = Column(String(255), nullable=True)
+    uid = Column(String, primary_key=True, index=True)
+    email = Column(String, unique=True, index=True, nullable=False)
+    name = Column(String, nullable=True)
+    avatar = Column(String, nullable=True)
+    hashed_password = Column(String, nullable=True)
+    roles = Column(ARRAY(String), default=["user"], nullable=False)  # e.g. ["user"] or ["user", "admin"]
+    is_active = Column(Boolean, default=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
-    refresh_token_hash = Column(String(255), nullable=True)
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
