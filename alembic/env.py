@@ -1,7 +1,7 @@
 
 from app.config import DATABASE_URL
 from app.database import Base
-from app.models import user
+from app.models import user, topic
 
 from logging.config import fileConfig
 
