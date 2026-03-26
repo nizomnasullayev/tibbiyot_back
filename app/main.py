@@ -1,21 +1,22 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.routers import auth
-from app.routers import auth, topic
+from app.routers import auth, topic, section, entry, user  # ← add user
 
 app = FastAPI(title="My App")
 
-# Allow requests from your React frontend
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Vite's default port
+    allow_origins=["http://localhost:5173"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
 app.include_router(auth.router)
+app.include_router(user.router)    # ← add
 app.include_router(topic.router)
+app.include_router(section.router)
+app.include_router(entry.router)
 
 @app.get("/")
 def root():
