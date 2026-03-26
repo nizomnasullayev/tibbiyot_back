@@ -423,7 +423,7 @@ def seed():
             "sections": [
                 {
                     "title": "Tish anatomiyasi va qavatlari",
-                    "image_url": None,
+                    "image_url": "https://res.cloudinary.com/dcv1xmyqq/image/upload/v1774505868/tibbiyot/vop0rfsnrayhhqeorpd7.jpg",
                     "entries": [
                         {"latin": "dens", "uzbek": "tish"},
                         {"latin": "corona dentis", "uzbek": "tish toji"},
@@ -442,7 +442,7 @@ def seed():
                 },
                 {
                     "title": "Tish turlari",
-                    "image_url": None,
+                    "image_url": "https://res.cloudinary.com/dcv1xmyqq/image/upload/v1774522670/tibbiyot/op2ficv6jthbotmdqgyi.jpg",
                     "entries": [
                         {"latin": "dens incisivus", "uzbek": "kurak tish"},
                         {"latin": "dens caninus", "uzbek": "qoziq tish"},
@@ -462,7 +462,7 @@ def seed():
             "sections": [
                 {
                     "title": "Og'iz bo'shlig'i",
-                    "image_url": None,
+                    "image_url": "https://res.cloudinary.com/dcv1xmyqq/image/upload/v1774505636/tibbiyot/ofgmlhmlc42j3d26as30.jpg",
                     "entries": [
                         {"latin": "cavitas oris", "uzbek": "og'iz bo'shlig'i"},
                         {"latin": "gingiva", "uzbek": "milk"},
@@ -489,7 +489,7 @@ def seed():
             "sections": [
                 {
                     "title": "Kalla suyaklari",
-                    "image_url": None,
+                    "image_url": "https://res.cloudinary.com/dcv1xmyqq/image/upload/v1774505534/tibbiyot/jbfohlt4b0biylv7skau.jpg",
                     "entries": [
                         {"latin": "ossa cranii", "uzbek": "kalla suyaklari"},
                         {"latin": "neurocranium", "uzbek": "miya qismi kallasi"},
@@ -541,7 +541,7 @@ def seed():
             "sections": [
                 {
                     "title": "Yuz mushaklari",
-                    "image_url": None,
+                    "image_url": "https://res.cloudinary.com/dcv1xmyqq/image/upload/v1774522881/tibbiyot/vxyd0ooffxa1ksyxxgua.jpg",
                     "entries": [
                         {"latin": "M. occipitofrontalis", "uzbek": "peshona-ensa mushagi"},
                         {"latin": "M. orbicularis oculi", "uzbek": "ko'z atrofidagi halqasimon mushak"},
@@ -568,7 +568,7 @@ def seed():
             "sections": [
                 {
                     "title": "Bo'yin mushaklari",
-                    "image_url": None,
+                    "image_url": "https://res.cloudinary.com/dcv1xmyqq/image/upload/v1774504346/tibbiyot/cq5r0ef3bkl3o0n7spv2.jpg",
                     "entries": [
                         {"latin": "M. zygomaticus major", "uzbek": "katta yonoq mushagi"},
                         {"latin": "M. risorius", "uzbek": "kulgich mushagi"},
