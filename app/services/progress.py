@@ -6,8 +6,11 @@ from app.models.user import User
 from app.services.test_generator import build_topic_test_questions, build_final_test_questions
 from app.services.certificate import generate_certificate, upload_certificate
 
+TOPIC_TEST_CACHE: dict[str, list[dict]] = {}
+FINAL_TEST_CACHE: dict[str, list[dict]] = {}
 
-# ── Progress ─────────────────────────────────────────────────
+
+# ?????? Progress ???????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????
 
 def get_all_progress(user: User, db: Session) -> list[UserProgress]:
     return db.query(UserProgress).filter(UserProgress.user_uid == user.uid).all()
@@ -19,7 +22,6 @@ def get_topic_progress(user: User, topic_uid: str, db: Session) -> UserProgress:
         UserProgress.topic_uid == topic_uid
     ).first()
     if not progress:
-        # create fresh progress record
         progress = UserProgress(user_uid=user.uid, topic_uid=topic_uid, learned_entries=[])
         db.add(progress)
         db.commit()
@@ -28,7 +30,6 @@ def get_topic_progress(user: User, topic_uid: str, db: Session) -> UserProgress:
 
 
 def learn_entry(user: User, topic_uid: str, entry_uid: str, db: Session) -> UserProgress:
-    # Validate entry belongs to topic
     entry = db.query(Entry).filter(Entry.uid == entry_uid, Entry.topic_uid == topic_uid).first()
     if not entry:
         raise HTTPException(status_code=404, detail="Entry not found in this topic")
@@ -36,7 +37,6 @@ def learn_entry(user: User, topic_uid: str, entry_uid: str, db: Session) -> User
     progress = get_topic_progress(user, topic_uid, db)
 
     if entry_uid not in (progress.learned_entries or []):
-        # Count total entries in topic
         total_entries = db.query(Entry).filter(Entry.topic_uid == topic_uid).count()
 
         new_learned = list(progress.learned_entries or []) + [entry_uid]
@@ -50,7 +50,7 @@ def learn_entry(user: User, topic_uid: str, entry_uid: str, db: Session) -> User
     return progress
 
 
-# ── Topic Tests ───────────────────────────────────────────────
+# ?????? Topic Tests ?????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????
 
 def get_topic_test(user: User, topic_uid: str, db: Session) -> list[dict]:
     progress = get_topic_progress(user, topic_uid, db)
@@ -66,7 +66,9 @@ def get_topic_test(user: User, topic_uid: str, db: Session) -> list[dict]:
         raise HTTPException(status_code=404, detail="Topic not found")
 
     entries = db.query(Entry).filter(Entry.topic_uid == topic_uid).all()
-    return build_topic_test_questions(entries)
+    questions = build_topic_test_questions(entries)
+    TOPIC_TEST_CACHE[f"{user.uid}:{topic_uid}"] = questions
+    return questions
 
 
 def submit_topic_test(user: User, topic_uid: str, answers: list, db: Session) -> dict:
@@ -75,16 +77,18 @@ def submit_topic_test(user: User, topic_uid: str, answers: list, db: Session) ->
     if progress.progress < 100.0:
         raise HTTPException(status_code=403, detail="Topic not fully learned yet")
 
-    # Generate correct answers to compare
-    entries = db.query(Entry).filter(Entry.topic_uid == topic_uid).all()
-    questions = build_topic_test_questions(entries)
+    cache_key = f"{user.uid}:{topic_uid}"
+    questions = TOPIC_TEST_CACHE.get(cache_key)
+    if not questions:
+        entries = db.query(Entry).filter(Entry.topic_uid == topic_uid).all()
+        questions = build_topic_test_questions(entries)
+
     correct_map = {q["id"]: q["correct_answer"] for q in questions}
 
     score = sum(1 for a in answers if correct_map.get(a.question_id) == a.answer)
     total = len(questions)
-    passed = score >= 1  # any score passes topic test
+    passed = score >= 1
 
-    # Save result
     result = TopicTestResult(
         user_uid=user.uid,
         topic_uid=topic_uid,
@@ -94,9 +98,9 @@ def submit_topic_test(user: User, topic_uid: str, answers: list, db: Session) ->
     )
     db.add(result)
 
-    # Mark topic test as passed
-    progress.topic_test_passed = True
+    progress.topic_test_passed = passed
     db.commit()
+    TOPIC_TEST_CACHE.pop(cache_key, None)
 
     accuracy = round((score / total) * 100, 1) if total > 0 else 0
 
@@ -109,7 +113,7 @@ def submit_topic_test(user: User, topic_uid: str, answers: list, db: Session) ->
     }
 
 
-# ── Final Tests ───────────────────────────────────────────────
+# ?????? Final Tests ?????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????
 
 def check_all_topics_passed(user: User, db: Session) -> bool:
     all_topics = db.query(Topic).all()
@@ -131,15 +135,20 @@ def get_final_test(user: User, db: Session) -> list[dict]:
         )
 
     all_entries = db.query(Entry).all()
-    return build_final_test_questions(all_entries, total=50)
+    questions = build_final_test_questions(all_entries, total=50)
+    FINAL_TEST_CACHE[user.uid] = questions
+    return questions
 
 
 def submit_final_test(user: User, answers: list, db: Session) -> dict:
     if not check_all_topics_passed(user, db):
         raise HTTPException(status_code=403, detail="You must complete all topic tests first")
 
-    all_entries = db.query(Entry).all()
-    questions = build_final_test_questions(all_entries, total=50)
+    questions = FINAL_TEST_CACHE.get(user.uid)
+    if not questions:
+        all_entries = db.query(Entry).all()
+        questions = build_final_test_questions(all_entries, total=50)
+
     correct_map = {q["id"]: q["correct_answer"] for q in questions}
 
     score = sum(1 for a in answers if correct_map.get(a.question_id) == a.answer)
@@ -147,7 +156,6 @@ def submit_final_test(user: User, answers: list, db: Session) -> dict:
     accuracy = round((score / total) * 100, 1) if total > 0 else 0
     passed = score >= 35
 
-    # Save result
     result = FinalTestResult(
         user_uid=user.uid,
         score=score,
@@ -157,8 +165,8 @@ def submit_final_test(user: User, answers: list, db: Session) -> dict:
     )
     db.add(result)
     db.commit()
+    FINAL_TEST_CACHE.pop(user.uid, None)
 
-    # Generate certificate if passed
     if passed:
         existing_cert = db.query(Certificate).filter(Certificate.user_uid == user.uid).first()
         if not existing_cert:
@@ -172,7 +180,6 @@ def submit_final_test(user: User, answers: list, db: Session) -> dict:
             db.commit()
             db.refresh(cert)
 
-            # Generate and upload certificate image
             full_name = f"{user.name}" if user.name else "Foydalanuvchi"
             img_bytes = generate_certificate(full_name, accuracy, cert.uid, cert_number)
             cert_url = upload_certificate(img_bytes, cert.uid)
@@ -185,5 +192,5 @@ def submit_final_test(user: User, answers: list, db: Session) -> dict:
         "total": total,
         "passed": passed,
         "accuracy": accuracy,
-        "message": "Sertifikat olindi! 🎉" if passed else f"Kamida 35 ta to'g'ri javob kerak. Siz {score} ta topdingiz.",
+        "message": "Sertifikat olindi!" if passed else f"Kamida 35 ta to'g'ri javob kerak. Siz {score} ta topdingiz.",
     }

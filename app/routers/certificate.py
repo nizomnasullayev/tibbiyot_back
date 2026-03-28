@@ -15,7 +15,7 @@ def get_my_certificate(current_user: User = Depends(get_current_user), db: Sessi
         raise HTTPException(status_code=404, detail="No certificate yet. Complete all tests first!")
     return cert
 
-@router.get("/verify/{uid}")          # public — no auth needed
+@router.get("/verify/{uid}")
 def verify_certificate(uid: str, db: Session = Depends(get_db)):
     cert = db.query(Certificate).filter(Certificate.uid == uid).first()
     if not cert:
