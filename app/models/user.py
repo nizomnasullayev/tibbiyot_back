@@ -9,6 +9,9 @@ class User(Base):
     uid = Column(String, primary_key=True, index=True)
     email = Column(String, unique=True, index=True, nullable=False)
     name = Column(String, nullable=True)
+    first_name = Column(String, nullable=True)
+    last_name = Column(String, nullable=True)
+    father_name = Column(String, nullable=True)
     avatar = Column(String, nullable=True)
     hashed_password = Column(String, nullable=True)
     roles = Column(ARRAY(String), default=["user"], nullable=False)  # e.g. ["user"] or ["user", "admin"]

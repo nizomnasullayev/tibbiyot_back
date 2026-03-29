@@ -1,8 +1,8 @@
-"""add users topics sections entries progress certificate and images
+"""users topics sections entries progress tests certificates full name
 
-Revision ID: 9122bb97b5de
+Revision ID: e3a443c6c741
 Revises: 
-Create Date: 2026-03-28 08:40:18.775638
+Create Date: 2026-03-29 16:47:32.460323
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
-revision: str = '9122bb97b5de'
+revision: str = 'e3a443c6c741'
 down_revision: Union[str, Sequence[str], None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -32,6 +32,9 @@ def upgrade() -> None:
     sa.Column('uid', sa.String(), nullable=False),
     sa.Column('email', sa.String(), nullable=False),
     sa.Column('name', sa.String(), nullable=True),
+    sa.Column('first_name', sa.String(), nullable=True),
+    sa.Column('last_name', sa.String(), nullable=True),
+    sa.Column('father_name', sa.String(), nullable=True),
     sa.Column('avatar', sa.String(), nullable=True),
     sa.Column('hashed_password', sa.String(), nullable=True),
     sa.Column('roles', postgresql.ARRAY(sa.String()), nullable=False),
