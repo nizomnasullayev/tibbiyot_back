@@ -1,8 +1,8 @@
-"""users topics sections entries progress tests certificates full name
+"""add users topics sections entries progress certificate and images
 
-Revision ID: e3a443c6c741
+Revision ID: 2b25a8b1f36d
 Revises: 
-Create Date: 2026-03-29 16:47:32.460323
+Create Date: 2026-03-29 19:03:33.726435
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
-revision: str = 'e3a443c6c741'
+revision: str = '2b25a8b1f36d'
 down_revision: Union[str, Sequence[str], None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None

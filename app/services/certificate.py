@@ -11,6 +11,7 @@ SIGNATURE_PATH = os.path.join(os.path.dirname(__file__), "../assets/signature.pn
 DEFAULT_FONT_PATH = os.path.join(os.path.dirname(__file__), "../assets/font.ttf")
 TIMES_REGULAR = r"C:\Windows\Fonts\times.ttf"
 TIMES_BOLD = r"C:\Windows\Fonts\timesbd.ttf"
+CERT_BLUE = "#234f93"
 
 
 def get_font(size: int, font_path: str | None = None):
@@ -68,64 +69,67 @@ def generate_certificate(
     font_name = fit_font(draw, user_full_name, 60, int(width * 0.58), TIMES_BOLD)
     font_accuracy = get_font(36, TIMES_REGULAR)
     font_small = get_font(24, TIMES_REGULAR)
-    font_date = get_font(30, TIMES_BOLD)
+    font_date = get_font(36, TIMES_BOLD)
     font_signer = get_font(32, TIMES_BOLD)
 
     cert_no = f"{certificate_number:03d}"
-    draw.text(
-        (width // 2, 42),
+    draw_text_with_bg(
+        draw,
+        (width // 2, 52),
         cert_no,
-        font=get_font(34, TIMES_BOLD),
-        fill="black",
-        anchor="mm",
+        get_font(30, TIMES_BOLD),
+        fill=CERT_BLUE,
+        bg="white",
+        padding_x=20,
+        padding_y=8,
     )
 
-    name_y = int(height * 0.332)
+    name_y = int(height * 0.325)
     draw.text(
         (width // 2, name_y),
         user_full_name,
         font=font_name,
-        fill="black",
+        fill=CERT_BLUE,
         anchor="mm",
         stroke_width=1,
-        stroke_fill="black",
+        stroke_fill=CERT_BLUE,
     )
 
     accuracy_text = f"{round(accuracy)}%"
-    accuracy_y = int(height * 0.445)
-    draw.text((width // 2, accuracy_y), accuracy_text, font=font_accuracy, fill="black", anchor="mm")
+    accuracy_y = int(height * 0.41)
+    draw.text((width // 2, accuracy_y), accuracy_text, font=font_accuracy, fill=CERT_BLUE, anchor="mm")
 
     verify_url = f"https://yourapp.com/verify/{certificate_uid}"
     qr_img = generate_qr_code(verify_url)
-    qr_size = int(height * 0.145)
+    qr_size = int(height * 0.20)
     qr_img = qr_img.resize((qr_size, qr_size))
-    qr_x = int(width * 0.075)
-    qr_y = int(height * 0.765)
+    qr_x = int(width * 0.11)
+    qr_y = int(height * 0.71)
     template.paste(qr_img, (qr_x, qr_y), qr_img)
 
     date_str = datetime.now().strftime("%d.%m.%Y")
-    date_x = qr_x + qr_size + 82
-    date_y = qr_y + qr_size - 16
-    draw.text((date_x, date_y), date_str, font=font_date, fill="black", anchor="lm")
+    date_x = qr_x + qr_size + 90
+    date_y = qr_y + qr_size - 10
+    draw.text((date_x, date_y), date_str, font=font_date, fill=CERT_BLUE, anchor="lm")
 
     try:
         signature = Image.open(SIGNATURE_PATH).convert("RGBA")
-        sig_width = int(width * 0.19)
+        sig_width = int(width * 0.24)
         sig_ratio = signature.height / signature.width
         sig_height = int(sig_width * sig_ratio)
         signature = signature.resize((sig_width, sig_height))
-        sig_x = int(width * 0.685)
-        sig_y = int(height * 0.735)
+        sig_x = int(width * 0.66)
+        sig_y = int(height * 0.74)
         template.paste(signature, (sig_x, sig_y), signature)
     except Exception:
         pass
 
-    signer_y = int(height * 0.905)
+    signer_y = int(height * 0.89)
     draw.text(
-        (int(width * 0.745), signer_y),
+        (int(width * 0.72), signer_y),
         "Maxmurova Mavjuda Halimovna",
         font=font_signer,
-        fill="black",
+        fill=CERT_BLUE,
         anchor="mm",
     )
 
