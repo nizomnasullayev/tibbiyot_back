@@ -4,9 +4,11 @@ from app.routers import auth, topic, section, entry, user, upload, progress, tes
 
 app = FastAPI(title="My App")
 
+app.router.redirect_slashes = False
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"],
+     allow_origins=["http://localhost:5173", "https://tibbiyot-front.vercel.app"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
