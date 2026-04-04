@@ -4,7 +4,7 @@ import qrcode
 from PIL import Image, ImageDraw, ImageFont
 from datetime import datetime
 import cloudinary.uploader
-from app.config import CLOUDINARY_CLOUD_NAME
+from app.config import CLOUDINARY_CLOUD_NAME, APP_URL
 
 TEMPLATE_PATH = os.path.join(os.path.dirname(__file__), "../assets/certificate_template.png")
 SIGNATURE_PATH = os.path.join(os.path.dirname(__file__), "../assets/signature.png")
@@ -99,7 +99,7 @@ def generate_certificate(
     accuracy_y = int(height * 0.41)
     draw.text((width // 2, accuracy_y), accuracy_text, font=font_accuracy, fill=CERT_BLUE, anchor="mm")
 
-    verify_url = f"https://yourapp.com/verify/{certificate_uid}"
+    verify_url = f"{APP_URL}/certificates/verify/{certificate_uid}"
     qr_img = generate_qr_code(verify_url)
     qr_size = int(height * 0.20)
     qr_img = qr_img.resize((qr_size, qr_size))
